@@ -38,8 +38,6 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
         weight_vec = weights  # type:np.array
 
     def rank_diff_agg(idx):
-        print("Start ", int(idx[0]) - 1)
-        print("Stop ", int(idx[1]) - 1)
         slice_object = slice(int(idx[0])-1, int(idx[1])-1)
         weight_vector = weight_vec[slice_object]
         print("weight_vector: ", weight_vector)
@@ -74,7 +72,7 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
 
     con = tnorm(pairs_a, pairs_b).sum()
     dis = tnorm(pairs_a, pairs_b.T).sum()
-
+    print("con ", con, ", dis ", dis)
     try:
         return (con - dis) / (con + dis)
     except ZeroDivisionError:
