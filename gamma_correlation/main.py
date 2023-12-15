@@ -40,9 +40,7 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
     def rank_diff_agg(idx):
         slice_object = slice(int(idx[0])-1, int(idx[1])-1)
         weight_vector = weight_vec[slice_object]
-        print("weight_vector: ", weight_vector)
         weight_aggre = weight_agg(weight_vector)
-        print("weight Aggre ", weight_aggre)
         return weight_aggre
 
     def calculate_pairwise_comparisons(ranking: np.array) -> np.array:
