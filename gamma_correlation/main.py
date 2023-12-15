@@ -40,9 +40,9 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
     def rank_diff_agg(idx):
         try:
             print("idx ", idx)
-            idx2 = icx.astype(int)
+            idx2 = idx.astype(int)
             print("idx2 ", idx2)
-            index = dx2.tolist()
+            index = idx2.tolist()
             print(index)
             # Call the weight_agg function with the sliced_weight_vec
             return weight_agg(weight_vec[slice(*(index - 1))])
