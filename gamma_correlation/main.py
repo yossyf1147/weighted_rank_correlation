@@ -21,8 +21,8 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
     :return:
     """
     rankings = np.array([ranking_a, ranking_b])
-    if not np.array_equal(rankdata(rankings, axis=1, method="ordinal"), rankings):
-        raise ValueError("The provided rankings appear to be not proper rankings. Maybe they contain Ties?")
+    #if not np.array_equal(rankdata(rankings, axis=1, method="ordinal"), rankings):
+    #    raise ValueError("The provided rankings appear to be not proper rankings. Maybe they contain Ties?")
     n, ranklength = rankings.shape
 
     if weights is None:
