@@ -40,12 +40,12 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
     def rank_diff_agg(idx):
         try:
             print("idx ", idx)
-            idx2 = idx.astype(int)
+            idx2 = (idx-1).astype(int)
             print("idx2 ", idx2)
             index = idx2.tolist()
             print("index", index)
             # Call the weight_agg function with the sliced_weight_vec
-            return weight_agg(weight_vec[slice(*(index - 1))])
+            return weight_agg(weight_vec[slice(*index)])
         except TypeError as e:
             print(f"Error: {e} - {idx.astype(int).tolist()} - {type(idx.astype(int).tolist())}")
 
