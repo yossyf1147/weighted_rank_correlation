@@ -38,7 +38,7 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
         weight_vec = weights  # type:np.array
 
     def rank_diff_agg(idx):
-        return weight_agg(weight_vec[slice(idx[0]-1, idx[1]-1)])
+        return weight_agg(weight_vec[slice(int(idx[0])-1, int(idx[1])-1)])
 
     def calculate_pairwise_comparisons(ranking: np.array) -> np.array:
         """
