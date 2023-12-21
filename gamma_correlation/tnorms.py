@@ -1,4 +1,4 @@
-import numpy as np
+import cuml as np
 
 
 def prod(a, b):

@@ -8,8 +8,7 @@ packages = [{ include = "gamma_correlation" }]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
-numpy = "^1.24.2"
-scipy = "^1.11.2"
+cuml = "^23.10.10"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"

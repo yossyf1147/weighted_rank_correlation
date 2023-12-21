@@ -1,4 +1,4 @@
-import numpy as np
+import cuml as np
 
 
 def gen_weights(mode, len_):

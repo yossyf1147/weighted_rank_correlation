@@ -1,7 +1,6 @@
 from typing import Union, Optional
 
-import numpy as np
-from scipy.stats import rankdata
+import cuml as np
 
 from gamma_correlation.tnorms import prod
 from gamma_correlation.weights import gen_weights, weight_agg_max
