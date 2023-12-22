@@ -1,4 +1,4 @@
-import cuml as np
+import cupy as np
 
 
 def gen_weights(mode, len_):
@@ -39,4 +39,8 @@ def weight_agg_max(weights: np.ndarray) -> int:
     :param weights: distance weight
     :return:
     """
-    return weights.max(initial=0)
+    if weights.size == 0:
+        return 0
+    else:
+        #return weights.max(initial=0)
+        return np.max(weights)

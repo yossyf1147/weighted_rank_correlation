@@ -1,4 +1,4 @@
-import cuml as np
+import cupy as np
 
 
 def to_ranking(ordering: np.array) -> np.array:
