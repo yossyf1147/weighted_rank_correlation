@@ -1,6 +1,5 @@
 import cupy as np
 
-
 def gen_weights(mode, len_):
     def cropped_linspace(start, end):
         return np.linspace(start, end, len_ + 1)[1:-1]
@@ -39,8 +38,6 @@ def weight_agg_max(weights: np.ndarray) -> int:
     :param weights: distance weight
     :return:
     """
-    if weights.size == 0:
-        return 0
-    else:
-        #return weights.max(initial=0)
-        return np.max(weights)
+
+    return np.asnumpy(weights).max(initial=0)
+
