@@ -22,7 +22,9 @@ def gamma_corr(ranking_a: Union[list, numpy.ndarray, np.ndarray], ranking_b: Uni
     """
     rankings = np.array([ranking_a, ranking_b])
     if np.array_equal(rankdata(rankings, axis=1, method="ordinal"), rankings):
+        print("before": rankings)
         rankings = rankdata(rankings, axis=1, method='ordinal')
+        print("after", rankings)
 
     n, ranklength = rankings.shape
 
