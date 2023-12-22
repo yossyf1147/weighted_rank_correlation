@@ -1,12 +1,12 @@
 from typing import Union, Optional
 
 import cupy as np
-
+import numpy
 from gamma_correlation.tnorms import prod
 from gamma_correlation.weights import gen_weights, weight_agg_max
 
 
-def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.ndarray], *,
+def gamma_corr(ranking_a: Union[list, numpy.ndarray, np.ndarray], ranking_b: Union[list, numpy.ndarray, np.ndarray], *,
                weights: Optional[Union[str, np.array]] = None, tnorm=prod, weight_agg=weight_agg_max):
     """
     :param ranking_a: First ranking
