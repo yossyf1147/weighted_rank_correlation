@@ -66,7 +66,7 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
 
     # calculate all pairwise comparisons for all rankings. This considers the weights
     pairs_a, pairs_b = np.apply_along_axis(calculate_pairwise_comparisons, 1, rankings)  # ranklength × ranklength
-    print(pairs_a, pairs_b)
+
     con = tnorm(pairs_a, pairs_b).sum()
     dis = tnorm(pairs_a, pairs_b.T).sum()
     print("con ", con, ", dis ", dis)
