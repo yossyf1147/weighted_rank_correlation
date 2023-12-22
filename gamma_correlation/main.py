@@ -2,6 +2,7 @@ from typing import Union, Optional
 
 import cupy as np
 import numpy
+from scipy.stats import rankdata
 from gamma_correlation.tnorms import prod
 from gamma_correlation.weights import gen_weights, weight_agg_max
 
@@ -20,12 +21,8 @@ def gamma_corr(ranking_a: Union[list, numpy.ndarray, np.ndarray], ranking_b: Uni
     :return:
     """
     rankings = np.array([ranking_a, ranking_b])
-   # if not np.array_equal(rankdata(rankings, axis=1, method="ordinal"), rankings):
-    #    try:
-    #        raise ValueError(
-    #            "The provided rankings appear to be not proper rankings. Maybe they contain Ties? At ranking")
-     #   except ValueError:
-     #       print("tiedranking", rankings)
+    if np.array_equal(rankdata(rankings, axis=1, method="ordinal"), rankings):
+        rankings = rankdata(rankings, axis=1, method='ordinal')
 
     n, ranklength = rankings.shape
 
