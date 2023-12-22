@@ -69,7 +69,7 @@ def gamma_corr(ranking_a: Union[list, numpy.ndarray, np.ndarray], ranking_b: Uni
 
     con = tnorm(pairs_a, pairs_b).sum()
     dis = tnorm(pairs_a, pairs_b.T).sum()
-    #print("con ", con, ", dis ", dis)
+    print("con ", con, ", dis ", dis)
     try:
         return (con - dis) / (con + dis)
     except ZeroDivisionError:
