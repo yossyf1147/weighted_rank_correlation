@@ -18,6 +18,10 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
     :param weight_agg: Weight aggregation to use
     :return:
     """
+
+    if len(ranking_a) != len(ranking_b):
+        raise ValueError("not the same shape")
+
     rankings = np.array([ranking_a, ranking_b])
     n, rank_length = rankings.shape
 
@@ -28,7 +32,10 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
     elif isinstance(weights, np.ndarray):
         weight_vec = weights  # type:np.array
 
-    def matrix_Calcuration(ranking: np.array, relation:str) -> np.array:
+    # upper triangle matrix to calculate all pairwise comparisons
+    triu = np.triu_indices(rank_length, 1)
+
+    def matrix_Calcuration(ranking: np.array, relation: str) -> np.array:
         """
         :param relation: String indicating the type of relation ('R' or 'd')
         :param ranking: 1 × n array of an ordering
@@ -52,8 +59,6 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
         else:
             raise ValueError("Invalid relation type. Must be 'R' or 'd'.")
 
-        # upper triangle matrix to calculate all pairwise comparisons
-        triu = np.triu_indices(rank_length, 1)
         pair_indices = np.array(triu)
         # calculate pairwise rank positions
         rank_positions = ranking[pair_indices]
@@ -61,9 +66,11 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
         # calculate weight slices and aggregate, return aij and aji
         # reshape the pairs back into a matrix
         matrix = np.zeros([rank_length, rank_length])
+
         # first we fill lower triangle with the inverse rank positions
         matrix[triu] = np.apply_along_axis(relation_function, 0, np.flipud(rank_positions))
         matrix = matrix.T
+
         # after transposing we fill the top triangle
         matrix[triu] = np.apply_along_axis(relation_function, 0, rank_positions)
 
@@ -73,7 +80,6 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
     d_a, d_b = np.apply_along_axis(matrix_Calcuration, 1, rankings, relation="d")  # rank_length × rank_length
     R_a, R_b = np.apply_along_axis(matrix_Calcuration, 1, rankings, relation="R")  # rank_length × rank_length
     E_a, E_b = 1 - d_a, 1 - d_b
-
 
     rows, cols = R_a.shape
     C_matrix = np.zeros([rows, cols])
@@ -86,11 +92,15 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
             D_matrix[i, j] = T(R_a[i, j], R_b[j, i], tnorm) + T(R_a[j, i], R_b[i, j], tnorm)
             T_matrix[i, j] = conorm(E_a[i, j], E_b[i, j], tnorm)
 
-    con = C_matrix.sum()
-    dis = D_matrix.sum()
-    tie = T_matrix.sum()
-    print(math.comb(rows,2))
-    print("condistie = nC2?", (con + dis + tie))
+    # print(C_matrix)
+    # print(D_matrix)
+    # print(T_matrix)
+
+    con = np.sum(C_matrix[triu])
+    dis = np.sum(D_matrix[triu])
+    tie = np.sum(T_matrix[triu])
+    print("nC2: ", math.comb(rows, 2))
+    print("condistie: ", (con + dis + tie))
 
     try:
         return (con - dis) / (con + dis)
@@ -99,7 +109,7 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
 
 
 if __name__ == '__main__':
-    first = [1, 3, 1, 4]
-    second = [1, 1, 2, 1]
+    first = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    second = [3, 4, 2, 1, 6, 8, 8, 10, 10, 5]
 
     print("gamma: ", gamma_corr(first, second, weights="top", tnorm=hamacher))
