@@ -19,13 +19,13 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
     :return:
     """
 
-    global weight_vec
     if len(ranking_a) != len(ranking_b):
         raise ValueError("not the same shape")
 
     rankings = np.array([ranking_a, ranking_b])
     n, rank_length = rankings.shape
 
+    global weight_vec
     if weights is None:
         weight_vec = gen_weights("uniform", rank_length)
     if isinstance(weights, str):
@@ -84,7 +84,6 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
     con = np.sum(C_matrix[triu])
     dis = np.sum(D_matrix[triu])
     tie = np.sum(T_matrix[triu])
-
 
     # print("nC2: ", math.comb(rows, 2))
     # print("condistie: ", (con + dis + tie))
