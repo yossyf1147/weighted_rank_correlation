@@ -6,7 +6,7 @@ from gamma_correlation.weights import *
 
 
 def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.ndarray], *,
-               weights: Optional[Union[str, np.array]] = None, tnorm=prod):
+               weights: Optional[Union[str, np.array]] = None, tnorm_type=prod):
     """
     :param ranking_a: First ranking
     :param ranking_b: Second ranking
@@ -14,8 +14,7 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
         If left empty weights will be set uniformly to 1.
         Weights between pairwise orderings. Must be one shorter than the length of the rankings.
         It can also be one of the following "uniform", "top", "bottom", "top bottom", "middle". Please refer to gen_weights for more detail
-    :param tnorm: T-Norm function to use
-    :param weight_agg: Weight aggregation to use
+    :param tnorm_type: T-Norm function to use
     :return:
     """
 
@@ -38,8 +37,6 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
 
     def D_matrix_Calcuration(ranking: np.array) -> np.array:
         """
-        :param weight:
-        :param relation: String indicating the type of relation ('R' or 'd')
         :param ranking: 1 × n array of an ordering
         :return: n × n pairwise weight aggregations.
         """
@@ -73,9 +70,9 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
 
     for i in range(rows):
         for j in range(cols):
-            C_matrix[i, j] = T(R_a[i, j], R_b[i, j], tnorm) + T(R_a[j, i], R_b[j, i], tnorm)
-            D_matrix[i, j] = T(R_a[i, j], R_b[j, i], tnorm) + T(R_a[j, i], R_b[i, j], tnorm)
-            T_matrix[i, j] = conorm(E_a[i, j], E_b[i, j], tnorm)
+            C_matrix[i, j] = T(R_a[i, j], R_b[i, j], tnorm_type) + T(R_a[j, i], R_b[j, i], tnorm_type)
+            D_matrix[i, j] = T(R_a[i, j], R_b[j, i], tnorm_type) + T(R_a[j, i], R_b[i, j], tnorm_type)
+            T_matrix[i, j] = conorm(E_a[i, j], E_b[i, j], tnorm_type)
 
     # print(C_matrix)
     # print(D_matrix)
@@ -98,4 +95,4 @@ if __name__ == '__main__':
     first = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     second = [3, 4, 2, 1, 6, 8, 8, 10, 10, 5]
 
-    print("gamma: ", gamma_corr(first, second, weights="top", tnorm=hamacher))
+    print("gamma: ", gamma_corr(first, second, weights="top", tnorm_type=hamacher))
