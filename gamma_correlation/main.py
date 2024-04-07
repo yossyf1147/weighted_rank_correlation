@@ -1,8 +1,8 @@
 from typing import Union, Optional
 import math
-from fuzzy import fuzzy_D
+from gamma_correlation.fuzzy import fuzzy_D
 from gamma_correlation.tnorms import *
-from gamma_correlation.weights import *
+from gamma_correlation.weights import gen_weights
 
 
 def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.ndarray], *,
