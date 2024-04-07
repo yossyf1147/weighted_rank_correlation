@@ -1,6 +1,6 @@
 from typing import Union, Optional
 import math
-from fuzzy import *
+from fuzzy import fuzzy_D
 from gamma_correlation.tnorms import *
 from gamma_correlation.weights import *
 
@@ -74,9 +74,9 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
             D_matrix[i, j] = T(R_a[i, j], R_b[j, i], tnorm_type) + T(R_a[j, i], R_b[i, j], tnorm_type)
             T_matrix[i, j] = conorm(E_a[i, j], E_b[i, j], tnorm_type)
 
-    # print(C_matrix)
-    # print(D_matrix)
-    # print(T_matrix)
+    print(C_matrix)
+    print(D_matrix)
+    print(T_matrix)
 
     con = np.sum(C_matrix[triu])
     dis = np.sum(D_matrix[triu])
@@ -92,7 +92,7 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
 
 
 if __name__ == '__main__':
-    first = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    first = [1, 1, 1, 1, 1, 2, 1, 1, 1, 1]
     second = [3, 4, 2, 1, 6, 8, 8, 10, 10, 5]
 
     print("gamma: ", gamma_corr(first, second, weights="top", tnorm_type=hamacher))
