@@ -100,7 +100,7 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
 
 
 if __name__ == '__main__':
-    first = [1, 1, 3, 4, 5, 6]
+    first = [1, 1, 1, 4, 5, 6]
     second = [3, 4, 2, 1, 6, 8]
 
     # print("gamma: ", gamma_corr(first, second, weights=(5.452626052423289,  3.7400837847567625), tnorm_type=hamacher))
