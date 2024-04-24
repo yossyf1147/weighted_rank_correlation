@@ -82,9 +82,9 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
             D_matrix[i, j] = T(R_a[i, j], R_b[j, i], tnorm_type) + T(R_a[j, i], R_b[i, j], tnorm_type)
             T_matrix[i, j] = conorm(E_a[i, j], E_b[i, j], tnorm_type)
 
-    print(C_matrix)
-    print(D_matrix)
-    print(T_matrix)
+    # print(C_matrix)
+    # print(D_matrix)
+    # print(T_matrix)
 
     con = np.sum(C_matrix[triu])
     dis = np.sum(D_matrix[triu])

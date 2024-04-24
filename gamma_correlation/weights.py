@@ -35,5 +35,5 @@ def gen_beta_weights(alpha: float, beta_: float, length: int) -> np.ndarray:
     x = np.linspace(0, 1, length+1)[1:-1]
     y = beta.pdf(x, alpha, beta_)
     y /= np.sum(y)  # Normalize weights to sum up to 1
-    print(y)
+    # print(y)
     return y
