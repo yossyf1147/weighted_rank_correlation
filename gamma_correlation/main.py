@@ -103,5 +103,5 @@ if __name__ == '__main__':
     first = [1, 1, 1, 4, 5, 6]
     second = [3, 4, 2, 1, 6, 8]
 
-    # print("gamma: ", gamma_corr(first, second, weights=(5.452626052423289,  3.7400837847567625), tnorm_type=hamacher))
-    print(gen_beta_weights(1.8,  0.1,6))
+    print("gamma: ", gamma_corr(first, second, weights=(2.6,  4.6), tnorm_type=hamacher))
+    print(gen_beta_weights(2.6,  4.6,10))

@@ -2,6 +2,7 @@ import numpy as np
 import scipy.special as sc
 from scipy.stats import beta
 
+
 def gen_weights(mode, len_):
     def cropped_linspace(start, end):
         return np.linspace(start, end, len_ + 1)[1:-1]
@@ -32,7 +33,7 @@ def gen_beta_weights(alpha: float, beta_: float, length: int) -> np.ndarray:
     :param length: Length of the weight vector
     :return: Array of weights generated from Beta distribution
     """
-    x = np.linspace(0.01, 0.99, length)
+    x = np.linspace(0.01, 0.99, length - 1)
     y = beta.pdf(x, alpha, beta_)
     y /= np.sum(y)  # Normalize weights to sum up to 1
     # print(y)
