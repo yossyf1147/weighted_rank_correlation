@@ -39,8 +39,6 @@ def T(a: float, b: float, tnorm_type: callable):
         return b
     if b == 1:
         return a
-    if a > b:
-        return T(b, a, tnorm_type)
     try:
         return tnorm_type(a, b)
     except Exception as e:

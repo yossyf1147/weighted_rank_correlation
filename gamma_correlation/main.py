@@ -1,10 +1,13 @@
 from typing import Union, Optional
 import math
+
+from matplotlib import pyplot as plt
+
 from gamma_correlation.fuzzy import fuzzy_D
 from gamma_correlation.tnorms import *
-from gamma_correlation.weights import gen_weights
-
-
+from gamma_correlation.weights import gen_weights,gen_beta_weights
+import scipy.special as sc
+import scipy
 def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.ndarray], *,
                weights: Optional[Union[str, np.array]] = None, tnorm_type=prod):
     """
@@ -31,6 +34,11 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
         weight_vec = gen_weights(weights, rank_length)
     elif isinstance(weights, np.ndarray):
         weight_vec = weights  # type:np.array
+    elif isinstance(weights, tuple) and len(weights) == 2:
+        alpha, beta_val = weights
+        weight_vec = gen_beta_weights(alpha, beta_val, rank_length)
+    else:
+        raise ValueError("Invalid weights format")
 
     # upper triangle matrix to calculate all pairwise comparisons
     triu = np.triu_indices(rank_length, 1)
@@ -74,9 +82,9 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
             D_matrix[i, j] = T(R_a[i, j], R_b[j, i], tnorm_type) + T(R_a[j, i], R_b[i, j], tnorm_type)
             T_matrix[i, j] = conorm(E_a[i, j], E_b[i, j], tnorm_type)
 
-    # print(C_matrix)
-    # print(D_matrix)
-    # print(T_matrix)
+    print(C_matrix)
+    print(D_matrix)
+    print(T_matrix)
 
     con = np.sum(C_matrix[triu])
     dis = np.sum(D_matrix[triu])
@@ -88,11 +96,11 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
     try:
         return (con - dis) / (con + dis)
     except ZeroDivisionError:
-        return np.nan
+        return 0 #happens if and only if the sum is 0
 
 
 if __name__ == '__main__':
-    first = [1, 1, 1, 1, 1, 2, 1, 1, 1, 1]
-    second = [3, 4, 2, 1, 6, 8, 8, 10, 10, 5]
+    first = [1, 1, 3, 4, 5, 6]
+    second = [3, 4, 2, 1, 6, 8]
 
-    print("gamma: ", gamma_corr(first, second, weights="top", tnorm_type=hamacher))
+    print("gamma: ", gamma_corr(first, second, weights=(2,3), tnorm_type=hamacher))

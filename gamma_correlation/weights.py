@@ -1,4 +1,7 @@
 import numpy as np
+import scipy.special as sc
+from scipy.stats import beta
+
 def gen_weights(mode, len_):
     def cropped_linspace(start, end):
         return np.linspace(start, end, len_ + 1)[1:-1]
@@ -19,3 +22,18 @@ def gen_weights(mode, len_):
         case _:
             raise AttributeError(f'mode "{mode}" not defined')
 
+
+def gen_beta_weights(alpha: float, beta_: float, length: int) -> np.ndarray:
+    """
+    Generate weights from Beta distribution.
+
+    :param alpha: Alpha parameter of Beta distribution
+    :param beta_: Beta parameter of Beta distribution
+    :param length: Length of the weight vector
+    :return: Array of weights generated from Beta distribution
+    """
+    x = np.linspace(0, 1, length+1)[1:-1]
+    y = beta.pdf(x, alpha, beta_)
+    y /= np.sum(y)  # Normalize weights to sum up to 1
+    print(y)
+    return y
