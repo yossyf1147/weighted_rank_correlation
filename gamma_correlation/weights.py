@@ -33,7 +33,7 @@ def gen_beta_weights(alpha: float, beta_: float, length: int) -> np.ndarray:
     :param length: Length of the weight vector
     :return: Array of weights generated from Beta distribution
     """
-    x = np.linspace(0.01, 0.99, length - 1)
+    x = np.linspace(0, 1, length - 1)
     y = beta.pdf(x, alpha, beta_)
     y /= np.sum(y)  # Normalize weights to sum up to 1
     # print(y)
@@ -50,7 +50,11 @@ def gen_quadratic_weights(a: float, b: float, c: float, length: int) -> np.ndarr
     :param length: Length of the weight vector
     :return: Array of weights generated from the quadratic function
     """
-    x = np.linspace(0.01, 0.99, length - 1)
+
+    b = min(max(b, 0), 1)
+
+    x = np.linspace(0, 1, length - 1)
     y = a * (x - b) * (x - b) + c
+    y = abs(y)
     y /= np.sum(y)  # Normalize weights to sum up to 1
     return y

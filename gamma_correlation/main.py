@@ -106,17 +106,17 @@ if __name__ == '__main__':
     second = [3, 4, 2, 1, 6, 8]
 
 
-    a = 1.3
-    b = 1
+    a = -1.3
+    b = 0
     c = 0.6
 
     print("gamma: ", gamma_corr(first, second, weights=(a, b, c), tnorm_type=hamacher))
 
     # 重みを生成
 
-    weights = gen_quadratic_weights(a, b, c, 6)
+    weights = gen_quadratic_weights(a, b, c, 10)
     print(weights)
-    plt.plot(np.linspace(0, 1, len(weights)), weights)
+    plt.plot(np.linspace(0, 1, 9), weights)
     plt.xlabel('Index')
     plt.ylabel('Weight')
     plt.title('Quadratic Weights')
