@@ -5,9 +5,11 @@ from matplotlib import pyplot as plt
 
 from gamma_correlation.fuzzy import fuzzy_D
 from gamma_correlation.tnorms import *
-from gamma_correlation.weights import gen_weights,gen_beta_weights
+from gamma_correlation.weights import gen_weights, gen_beta_weights, gen_quadratic_weights
 import scipy.special as sc
 import scipy
+
+
 def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.ndarray], *,
                weights: Optional[Union[str, np.array]] = None, tnorm_type=prod):
     """
@@ -96,12 +98,12 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
     try:
         return (con - dis) / (con + dis)
     except ZeroDivisionError:
-        return 0 #happens if and only if the sum is 0
+        return 0  # happens if and only if the sum is 0
 
 
 if __name__ == '__main__':
     first = [1, 1, 1, 4, 5, 6]
     second = [3, 4, 2, 1, 6, 8]
 
-    print("gamma: ", gamma_corr(first, second, weights=(2.6,  4.6), tnorm_type=hamacher))
-    print(gen_beta_weights(2.6,  4.6,10))
+    print("gamma: ", gamma_corr(first, second, weights=(2.6, 4.6), tnorm_type=hamacher))
+    print(gen_quadratic_weights(2.6, 4.6, 10,10))
