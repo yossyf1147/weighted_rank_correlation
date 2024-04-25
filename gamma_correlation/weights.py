@@ -50,8 +50,9 @@ def gen_quadratic_weights(a: float, b: float, c: float, length: int) -> np.ndarr
     :param length: Length of the weight vector
     :return: Array of weights generated from the quadratic function
     """
-
+    a = min(max(a, -4), 4)
     b = min(max(b, 0), 1)
+    c = min(max(c, 0), 1)
 
     x = np.linspace(0, 1, length - 1)
     y = a * (x - b) * (x - b) + c

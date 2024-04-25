@@ -106,9 +106,9 @@ if __name__ == '__main__':
     second = [3, 4, 2, 1, 6, 8]
 
 
-    a = -1.3
-    b = 0
-    c = 0.6
+    a = -1.75
+    b = 0.23500115163521662
+    c = 0.3201078586587879
 
     print("gamma: ", gamma_corr(first, second, weights=(a, b, c), tnorm_type=hamacher))
 
