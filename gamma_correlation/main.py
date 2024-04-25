@@ -1,13 +1,10 @@
 from typing import Union, Optional
-import math
 
 from matplotlib import pyplot as plt
 
 from gamma_correlation.fuzzy import fuzzy_D
 from gamma_correlation.tnorms import *
 from gamma_correlation.weights import gen_weights, gen_beta_weights, gen_quadratic_weights
-import scipy.special as sc
-import scipy
 
 
 def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.ndarray], *,
@@ -108,5 +105,19 @@ if __name__ == '__main__':
     first = [1, 1, 1, 4, 5, 6]
     second = [3, 4, 2, 1, 6, 8]
 
-    print("gamma: ", gamma_corr(first, second, weights=(2.6, 4.6,3 ), tnorm_type=hamacher))
-    print(gen_quadratic_weights(2.6, 4.6, 10, 10))
+
+    a = 1.3
+    b = 1
+    c = 0.6
+
+    print("gamma: ", gamma_corr(first, second, weights=(a, b, c), tnorm_type=hamacher))
+
+    # 重みを生成
+
+    weights = gen_quadratic_weights(a, b, c, 6)
+    print(weights)
+    plt.plot(np.linspace(0, 1, len(weights)), weights)
+    plt.xlabel('Index')
+    plt.ylabel('Weight')
+    plt.title('Quadratic Weights')
+    plt.show()
