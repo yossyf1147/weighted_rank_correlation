@@ -39,6 +39,7 @@ def gen_beta_weights(alpha: float, beta_: float, length: int) -> np.ndarray:
     # print(y)
     return y
 
+
 def gen_quadratic_weights(a: float, b: float, c: float, length: int) -> np.ndarray:
     """
     Generate weights from a quadratic function.
@@ -49,8 +50,7 @@ def gen_quadratic_weights(a: float, b: float, c: float, length: int) -> np.ndarr
     :param length: Length of the weight vector
     :return: Array of weights generated from the quadratic function
     """
-    x = np.linspace(0.01, 0.99, length-1)
-    y = a * x**2 + b * x + c
+    x = np.linspace(0.01, 0.99, length - 1)
+    y = a * (x - b) * (x - b) + c
     y /= np.sum(y)  # Normalize weights to sum up to 1
     return y
-
