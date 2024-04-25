@@ -109,4 +109,4 @@ if __name__ == '__main__':
     second = [3, 4, 2, 1, 6, 8]
 
     print("gamma: ", gamma_corr(first, second, weights=(2.6, 4.6), tnorm_type=hamacher))
-    print(gen_quadratic_weights(2.6, 4.6, 10,10))
+    print(gen_quadratic_weights(2.6, 4.6, 10, 10))
