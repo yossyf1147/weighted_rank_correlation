@@ -102,18 +102,7 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
         return 0  # happens if and only if the sum is 0
 
 
-if __name__ == '__main__':
-    first = [1, 1, 1, 4, 5, 6]
-    second = [3, 4, 2, 1, 6, 8]
-
-    a = random.uniform(-10, 10)
-    b = random.uniform(0, 1)
-    c = random.uniform(0, 1)
-    print(a,b,c)
-    print("gamma: ", gamma_corr(first, second, weights=(a, b, c), tnorm_type=hamacher))
-
-    # 重みを生成
-
+def graph_plot(a, b, c):
     weights = gen_quadratic_weights(a, b, c, 10)
     print(weights)
     plt.plot(np.linspace(0, 1, 9), weights)
@@ -121,3 +110,15 @@ if __name__ == '__main__':
     plt.ylabel('Weight')
     plt.title('Quadratic Weights')
     plt.show()
+
+
+if __name__ == '__main__':
+    first = [1, 1, 1, 4, 5, 6]
+    second = [3, 4, 2, 1, 6, 8]
+
+    a = random.uniform(-10, 10)
+    b = random.uniform(0, 1)
+    c = random.uniform(0, 1)
+    print(a, b, c)
+    print("gamma: ", gamma_corr(first, second, weights=(a, b, c), tnorm_type=hamacher))
+    graph_plot(a, b, c)
