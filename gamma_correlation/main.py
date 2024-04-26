@@ -109,6 +109,7 @@ def graph_plot(a, b, c):
     plt.xlabel('Index')
     plt.ylabel('Weight')
     plt.title('Quadratic Weights')
+    plt.ylim(0, 1)
     plt.show()
 
 
