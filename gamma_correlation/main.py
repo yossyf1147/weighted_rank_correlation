@@ -106,7 +106,7 @@ if __name__ == '__main__':
     first = [1, 1, 1, 4, 5, 6]
     second = [3, 4, 2, 1, 6, 8]
 
-    a = random.uniform(-1, 1)
+    a = random.uniform(-10, 10)
     b = random.uniform(0, 1)
     c = random.uniform(0, 1)
     print(a,b,c)
