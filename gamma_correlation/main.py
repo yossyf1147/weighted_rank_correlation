@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 from gamma_correlation.fuzzy import fuzzy_D
 from gamma_correlation.tnorms import *
 from gamma_correlation.weights import gen_weights, gen_beta_weights, gen_quadratic_weights
+import random
 
 
 def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.ndarray], *,
@@ -105,11 +106,10 @@ if __name__ == '__main__':
     first = [1, 1, 1, 4, 5, 6]
     second = [3, 4, 2, 1, 6, 8]
 
-
-    a = -1.75
-    b = 0.23500115163521662
-    c = 0.3201078586587879
-
+    a = random.uniform(-1, 1)
+    b = random.uniform(0, 1)
+    c = random.uniform(0, 1)
+    print(a,b,c)
     print("gamma: ", gamma_corr(first, second, weights=(a, b, c), tnorm_type=hamacher))
 
     # 重みを生成
