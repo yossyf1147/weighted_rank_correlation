@@ -34,12 +34,12 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
         weight_vec = gen_weights(weights, rank_length)
     elif isinstance(weights, np.ndarray):
         weight_vec = weights  # type:np.array
+    # elif isinstance(weights, tuple) and len(weights) == 2:
+    #     alpha, beta_val = weights
+    #     weight_vec = gen_beta_weights(alpha, beta_val, rank_length)
     elif isinstance(weights, tuple) and len(weights) == 2:
-        alpha, beta_val = weights
-        weight_vec = gen_beta_weights(alpha, beta_val, rank_length)
-    elif isinstance(weights, tuple) and len(weights) == 3:
-        a, b, c = weights
-        weight_vec = gen_quadratic_weights(a, b, c, rank_length)
+        a, b = weights
+        weight_vec = gen_quadratic_weights(a, b, rank_length)
     else:
         raise ValueError("Invalid weights format")
 
@@ -102,8 +102,8 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
         return 0  # happens if and only if the sum is 0
 
 
-def graph_plot(a, b, c):
-    weights = gen_quadratic_weights(a, b, c, 10)
+def graph_plot(a, b):
+    weights = gen_quadratic_weights(a, b, 10)
     print(weights)
     plt.plot(np.linspace(0, 1, 9), weights)
     plt.xlabel('Index')
@@ -117,9 +117,11 @@ if __name__ == '__main__':
     first = [1, 1, 1, 4, 5, 6]
     second = [3, 4, 2, 1, 6, 8]
 
-    a = random.uniform(-10, 10)
+    a = random.uniform(-2, 2)
     b = random.uniform(0, 1)
-    c = random.uniform(0, 1)
-    print(a, b, c)
-    print("gamma: ", gamma_corr(first, second, weights=(a, b, c), tnorm_type=hamacher))
-    graph_plot(a, b, c)
+
+    # a = -3.883119482194754
+    # b = 0.659287360412
+    print(a, b)
+    print("gamma: ", gamma_corr(first, second, weights=(a, b), tnorm_type=hamacher))
+    graph_plot(a, b)
