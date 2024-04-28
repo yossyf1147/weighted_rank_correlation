@@ -24,20 +24,23 @@ def gen_weights(mode, len_):
             raise AttributeError(f'mode "{mode}" not defined')
 
 
-def gen_beta_weights(alpha: float, beta_: float, length: int) -> np.ndarray:
+def gen_beta_weights(is_positive: bool, alpha: float, beta_: float, length: int) -> np.ndarray:
     """
     Generate weights from Beta distribution.
 
+    :param is_positive:
     :param alpha: Alpha parameter of Beta distribution
     :param beta_: Beta parameter of Beta distribution
     :param length: Length of the weight vector
     :return: Array of weights generated from Beta distribution
     """
-    x = np.linspace(0, 1, length - 1)
+    x = np.linspace(0, 1, length + 1)[1:-1]
     y = beta.pdf(x, alpha, beta_)
-    y /= np.sum(y)  # Normalize weights to sum up to 1
-    # print(y)
-    return y
+    y /= np.max(y)
+    if is_positive:
+        return y
+    else:
+        return 1 - y
 
 
 def gen_quadratic_weights(a: float, b: float, length: int) -> np.ndarray:
@@ -52,8 +55,9 @@ def gen_quadratic_weights(a: float, b: float, length: int) -> np.ndarray:
     """
     x = np.linspace(0, 1, length - 1)
     y = a * x * x + b * x
-    if np.min(y) < 0:
-        y -= np.min(y)
+    # if np.min(y) < 0:
+    #     y -= np.min(y)
+    y = np.abs(y)
     if np.max(y) > 1:
         y /= np.max(y)
     return y
