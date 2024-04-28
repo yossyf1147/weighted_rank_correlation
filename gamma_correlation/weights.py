@@ -51,10 +51,11 @@ def gen_quadratic_weights(a: float, b: float, length: int) -> np.ndarray:
     :return: Array of weights generated from the quadratic function
     """
     x = np.linspace(0, 1, length - 1)
-    y = a * (x - b) * (x - b)
+    y = a * x * x + b * x
     if np.min(y) < 0:
         y -= np.min(y)
-    y /= np.max(y)
+    if np.max(y) > 1:
+        y /= np.max(y)
     return y
 
     # if a >= 0:

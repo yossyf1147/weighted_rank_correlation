@@ -118,10 +118,9 @@ if __name__ == '__main__':
     second = [3, 4, 2, 1, 6, 8]
 
     a = random.uniform(-2, 2)
-    b = random.uniform(0, 1)
-
-    # a = -3.883119482194754
-    # b = 0.659287360412
+    b = random.uniform(-2, 2)
+    # a = -0.7577170458844646
+    # b = 0.070
     print(a, b)
     print("gamma: ", gamma_corr(first, second, weights=(a, b), tnorm_type=hamacher))
     graph_plot(a, b)
