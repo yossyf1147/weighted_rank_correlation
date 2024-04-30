@@ -62,15 +62,15 @@ def gen_quadratic_weights(a: float, b: float, length: int) -> np.ndarray:
         y /= np.max(y)
     return y
 
-    # if a >= 0:
-    #     c = max(0, c)
-    #     if b >= 0.5:
-    #         a = min(a, (1 - c) / (b * b))
-    #     else:
-    #         a = min(a, (1 - c) / ((1 - b) * (1 - b)))
-    # else:
-    #     c = min(1, c)
-    #     if b >= 0.5:
-    #         a = max(a, -c / (b * b))
-    #     else:
-    #         a = max(a, -c / ((1 - b) * (1 - b)))
+
+def gen_yoshi_weights(is_positive: bool, point: float, length: int) -> np.ndarray:
+    point = np.clip(point, 0.0001, 0.9999)
+
+    x = np.linspace(0, 1, length - 1)
+
+    if is_positive:
+        weights = np.where(x <= point, -x / point + 1, (x - 1) / (1 - point) + 1)
+    else:
+        weights = np.where(x <= point, x / point, - (x - 1) / (1 - point))
+
+    return weights

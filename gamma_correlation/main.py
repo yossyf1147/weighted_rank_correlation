@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 
 from gamma_correlation.fuzzy import fuzzy_D
 from gamma_correlation.tnorms import *
-from gamma_correlation.weights import gen_weights, gen_beta_weights, gen_quadratic_weights
+from gamma_correlation.weights import gen_weights, gen_beta_weights, gen_quadratic_weights, gen_yoshi_weights
 import random
 
 
@@ -39,9 +39,15 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
         weight_vec = gen_beta_weights(is_positive, alpha, beta_val, rank_length)
     elif isinstance(weights, tuple) and len(weights) == 2:
         alpha, beta_val = weights
-        weight_vec = gen_quadratic_weights(alpha, beta_val, rank_length)
+        if isinstance(alpha, bool):
+            weight_vec = gen_yoshi_weights(alpha, beta_val, rank_length)
+        else:
+            weight_vec = gen_quadratic_weights(alpha, beta_val, rank_length)
     else:
         raise ValueError("Invalid weights format")
+
+    if not len(weight_vec) + 1 == rank_length:
+        raise ValueError("Invalid ranking length")
 
     # upper triangle matrix to calculate all pairwise comparisons
     triu = np.triu_indices(rank_length, 1)
@@ -123,15 +129,22 @@ def graph_beta_plot(is_positive, a, b):
     plt.show()
 
 
+def graph_yoshi_plot(is_positive, point):
+    weights = gen_yoshi_weights(is_positive, point, 1000)
+    plt.plot(np.linspace(0, 1, 999), weights)
+    plt.xlabel('Index')
+    plt.ylabel('Weight')
+    plt.title('Quadratic Weights')
+    plt.ylim(0, 1)
+    plt.show()
+
+
 if __name__ == '__main__':
     first = [1, 1, 1, 4, 5, 6]
     second = [3, 4, 2, 1, 6, 8]
 
-    is_positive = False
-    a = random.uniform(0, 5)
-    b = random.uniform(0, 5)
-    # a = 5
-    # b = 3
-    print(a, b)
-    print("gamma: ", gamma_corr(first, second, weights=(is_positive, a, b), tnorm_type=hamacher))
-    graph_beta_plot(is_positive, a, b)
+    is_positive = True
+    a = random.uniform(0, 1)
+
+    print("gamma: ", gamma_corr(first, second, weights=(is_positive, a), tnorm_type=hamacher))
+    graph_yoshi_plot(is_positive, a)
