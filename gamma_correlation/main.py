@@ -39,10 +39,8 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
         weight_vec = gen_beta_weights(is_positive, alpha, beta_val, rank_length)
     elif isinstance(weights, tuple) and len(weights) == 2:
         alpha, beta_val = weights
-        if isinstance(alpha, bool):
-            weight_vec = gen_yoshi_weights(alpha, beta_val, rank_length)
-        else:
-            weight_vec = gen_quadratic_weights(alpha, beta_val, rank_length)
+        #weight_vec = gen_yoshi_weights(alpha, beta_val, rank_length)
+        weight_vec = gen_quadratic_weights(alpha, beta_val, rank_length)
     else:
         raise ValueError("Invalid weights format")
 
@@ -130,8 +128,8 @@ def graph_beta_plot(is_positive, a, b):
 
 
 def graph_yoshi_plot(is_positive, point):
-    weights = gen_yoshi_weights(is_positive, point, 1000)
-    plt.plot(np.linspace(0, 1, 999), weights)
+    weights = gen_quadratic_weights(is_positive, point, 1000)
+    plt.plot(np.linspace(0.001, 0.999, 999), weights)
     plt.xlabel('Index')
     plt.ylabel('Weight')
     plt.title('Quadratic Weights')

@@ -43,7 +43,7 @@ def gen_beta_weights(is_positive: bool, alpha: float, beta_: float, length: int)
         return 1 - y
 
 
-def gen_quadratic_weights(a: float, b: float, length: int) -> np.ndarray:
+def gen_quadratic_weights(intercept: bool, x_intercept: float, length: int) -> np.ndarray:
     """
     Generate weights from a quadratic function.
 
@@ -53,14 +53,22 @@ def gen_quadratic_weights(a: float, b: float, length: int) -> np.ndarray:
     :param length: Length of the weight vector
     :return: Array of weights generated from the quadratic function
     """
-    x = np.linspace(0, 1, length - 1)
-    y = a * x * x + b * x
-    # if np.min(y) < 0:
-    #     y -= np.min(y)
-    y = np.abs(y)
-    if np.max(y) > 1:
-        y /= np.max(y)
-    return y
+    x = np.linspace(0.001, 0.999, length - 1)
+    x_intercept = np.clip(x_intercept, 0, 1)
+    gradient_a = 1 / ((x_intercept) * (x_intercept))
+    gradient_b = 1 / ((1 - x_intercept) * (1 - x_intercept))
+    x_square = (x - x_intercept) * (x - x_intercept)
+    if intercept:
+        if x_intercept <= 0.5:
+            weights = x_square * gradient_b
+        else:
+            weights = x_square * gradient_a
+    else:
+        if x_intercept <= 0.5:
+            weights = -x_square * gradient_b + 1
+        else:
+            weights = -x_square * gradient_a + 1
+    return weights
 
 
 def gen_yoshi_weights(is_positive: bool, point: float, length: int) -> np.ndarray:
