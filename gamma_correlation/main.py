@@ -36,13 +36,10 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
         weight_vec = weights  # type:np.array
     elif isinstance(weights, tuple) and len(weights) == 2:
         alpha, beta_val = weights
-        if isinstance(alpha, bool):
-            weight_vec = gen_quadratic_weights(alpha, beta_val, rank_length)
-        else:
-            weight_vec = gen_beta_weights(alpha, beta_val, rank_length)
-
-    elif isinstance(weights, tuple) and len(weights) == 2:
-        alpha, beta_val = weights
+        weight_vec = gen_quadratic_weights(alpha, beta_val, rank_length)
+    elif isinstance(weights, tuple) and len(weights) == 3:
+        flipped, alpha, beta_val = weights
+        weight_vec = gen_beta_weights(flipped, alpha, beta_val, rank_length)
     else:
         raise ValueError("Invalid weights format")
 
@@ -146,7 +143,7 @@ if __name__ == '__main__':
     flipped = True
     a = random.uniform(0, 20)
     b = random.uniform(0, 20)
-    # print("gamma: ", gamma_corr(first, second, weights=(is_positive, a), tnorm_type=hamacher))
+    print("gamma: ", gamma_corr(first, second, weights=(flipped, a,b), tnorm_type=hamacher))
     graph_beta_plot(flipped, a, b)
 
     # graph_quad_plot(False, 0.9425678270600196)
