@@ -3,59 +3,60 @@ import scipy.special as sc
 from scipy.stats import beta
 
 
+def cropped_linspace(start, end, len_):
+    return np.linspace(start, end, len_ + 1)[1:-1]
+
+
 def gen_weights(mode, len_):
-    def cropped_linspace(start, end):
-        return np.linspace(start, end, len_ + 1)[1:-1]
 
     match mode:
         case "uniform":
             return np.ones(len_ - 1)
         case "top":
-            return cropped_linspace(1, 0)
+            return cropped_linspace(1, 0, len_)
         case "bottom":
-            return cropped_linspace(0, 1)
+            return cropped_linspace(0, 1, len_)
         case "top bottom":
-            return np.abs(cropped_linspace(1, -1))
+            return np.abs(cropped_linspace(1, -1, len_))
         case "middle":
-            return 1 - np.abs(cropped_linspace(1, -1))
+            return 1 - np.abs(cropped_linspace(1, -1, len_))
         case 'top bottom exp':
-            return 4 * (cropped_linspace(0, 1) - 0.5) ** 2
+            return 4 * (cropped_linspace(0, 1, len_) - 0.5) ** 2
         case _:
             raise AttributeError(f'mode "{mode}" not defined')
 
 
-def gen_beta_weights(is_positive: bool, alpha: float, beta_: float, length: int) -> np.ndarray:
+def gen_beta_weights(flipped: bool, alpha: float, beta_: float, length: int) -> np.ndarray:
     """
     Generate weights from Beta distribution.
 
-    :param is_positive:
+    :param flipped:
     :param alpha: Alpha parameter of Beta distribution
     :param beta_: Beta parameter of Beta distribution
     :param length: Length of the weight vector
     :return: Array of weights generated from Beta distribution
     """
-    x = np.linspace(0, 1, length + 1)[1:-1]
+    x = cropped_linspace(0, 1, length)
     y = beta.pdf(x, alpha, beta_)
     y /= np.max(y)
-    if is_positive:
-        return y
-    else:
+    if flipped:
         return 1 - y
+    else:
+        return y
 
 
 def gen_quadratic_weights(intercept: bool, x_intercept: float, length: int) -> np.ndarray:
     """
     Generate weights from a quadratic function.
 
-    :param a: Coefficient of quadratic term
-    :param b: Coefficient of linear term
-    :param c: Constant term
+    :param x_intercept:
+    :param intercept:
     :param length: Length of the weight vector
     :return: Array of weights generated from the quadratic function
     """
     x = np.linspace(0.001, 0.999, length - 1)
     x_intercept = np.clip(x_intercept, 0, 1)
-    gradient_a = 1 / ((x_intercept) * (x_intercept))
+    gradient_a = 1 / (x_intercept * x_intercept)
     gradient_b = 1 / ((1 - x_intercept) * (1 - x_intercept))
     x_square = (x - x_intercept) * (x - x_intercept)
     if intercept:

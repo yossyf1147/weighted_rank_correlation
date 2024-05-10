@@ -34,13 +34,15 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
         weight_vec = gen_weights(weights, rank_length)
     elif isinstance(weights, np.ndarray):
         weight_vec = weights  # type:np.array
-    elif isinstance(weights, tuple) and len(weights) == 3:
-        is_positive, alpha, beta_val = weights
-        weight_vec = gen_beta_weights(is_positive, alpha, beta_val, rank_length)
     elif isinstance(weights, tuple) and len(weights) == 2:
         alpha, beta_val = weights
-        #weight_vec = gen_yoshi_weights(alpha, beta_val, rank_length)
-        weight_vec = gen_quadratic_weights(alpha, beta_val, rank_length)
+        if isinstance(alpha, bool):
+            weight_vec = gen_quadratic_weights(alpha, beta_val, rank_length)
+        else:
+            weight_vec = gen_beta_weights(alpha, beta_val, rank_length)
+
+    elif isinstance(weights, tuple) and len(weights) == 2:
+        alpha, beta_val = weights
     else:
         raise ValueError("Invalid weights format")
 
@@ -117,8 +119,8 @@ def graph_quad_plot(a, b):
     plt.show()
 
 
-def graph_beta_plot(is_positive, a, b):
-    weights = gen_beta_weights(is_positive, a, b, 1000)
+def graph_beta_plot(flipped, a, b):
+    weights = gen_beta_weights(flipped, a, b, 1000)
     plt.plot(np.linspace(0, 1, 999), weights)
     plt.xlabel('Index')
     plt.ylabel('Weight')
@@ -127,22 +129,25 @@ def graph_beta_plot(is_positive, a, b):
     plt.show()
 
 
-def graph_yoshi_plot(is_positive, point):
-    weights = gen_quadratic_weights(is_positive, point, 1000)
-    plt.plot(np.linspace(0.001, 0.999, 999), weights)
-    plt.xlabel('Index')
-    plt.ylabel('Weight')
-    plt.title('Quadratic Weights')
-    plt.ylim(0, 1)
-    plt.show()
+# def graph_yoshi_plot(is_positive, point):
+#     weights = gen_quadratic_weights(is_positive, point, 1000)
+#     plt.plot(np.linspace(0.001, 0.999, 999), weights)
+#     plt.xlabel('Index')
+#     plt.ylabel('Weight')
+#     plt.title('Quadratic Weights')
+#     plt.ylim(0, 1)
+#     plt.show()
 
 
 if __name__ == '__main__':
     first = [1, 1, 1, 4, 5, 6]
     second = [3, 4, 2, 1, 6, 8]
 
-    is_positive = True
-    a = random.uniform(0, 1)
+    flipped = True
+    a = random.uniform(0, 20)
+    b = random.uniform(0, 20)
+    # print("gamma: ", gamma_corr(first, second, weights=(is_positive, a), tnorm_type=hamacher))
+    graph_beta_plot(flipped, a, b)
 
-    print("gamma: ", gamma_corr(first, second, weights=(is_positive, a), tnorm_type=hamacher))
-    graph_yoshi_plot(is_positive, a)
+    # graph_quad_plot(False, 0.9425678270600196)
+    # graph_beta_plot(3.94, 9.49)
