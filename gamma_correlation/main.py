@@ -1,18 +1,28 @@
 from typing import Union, Optional
-
-from matplotlib import pyplot as plt
-
-from gamma_correlation.fuzzy import fuzzy_D
+from gamma_correlation.fuzzy import *
 from gamma_correlation.tnorms import *
-from gamma_correlation.weights import gen_weights, gen_beta_weights, gen_quadratic_weights, gen_yoshi_weights
-import random
+from gamma_correlation.weights import gen_weights, gen_beta_weights, gen_quadratic_weights
 
 
-def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.ndarray], *,
-               weights: Optional[Union[str, np.array]] = None, tnorm_type=prod):
+# @jit(nopython=True)
+def sequential_D_matrix_Calculation(ranking: np.array, weight_vec: np.ndarray, distance_func) -> np.ndarray:
+    rank_length = len(ranking)
+    matrix = np.zeros((rank_length, rank_length))
+    triu_indices = np.triu_indices(rank_length, 1)
+
+    for k in range(len(triu_indices[0])):
+        i, j = triu_indices[0][k], triu_indices[1][k]
+        matrix[i, j] = fuzzy_D(ranking[i], ranking[j], weight_vec, distance_func)
+        matrix[j, i] = -matrix[i, j]
+    return matrix
+
+
+def gamma_corr(ranking_x: Union[list, np.array], ranking_y: Union[list, np.array], *,
+               weights: Optional[Union[str, np.array]] = "uniform", tnorm_type=luka, distance_func="max_based"):
     """
-    :param ranking_a: First ranking
-    :param ranking_b: Second ranking
+    :param distance_func:
+    :param ranking_x: First ranking
+    :param ranking_y: Second ranking
     :param weights:
         If left empty weights will be set uniformly to 1.
         Weights between pairwise orderings. Must be one shorter than the length of the rankings.
@@ -20,16 +30,24 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
     :param tnorm_type: T-Norm function to use
     :return:
     """
+    if not isinstance(ranking_x, (list, np.ndarray)) or not isinstance(ranking_y, (list, np.ndarray)):
+        raise ValueError("Input must be a list or a NumPy array")
 
-    if len(ranking_a) != len(ranking_b):
-        raise ValueError("not the same shape")
+    if isinstance(ranking_x, list):
+        ranking_x = np.array(ranking_x)
+        ranking_y = np.array(ranking_y)
 
-    rankings = np.array([ranking_a, ranking_b])
-    n, rank_length = rankings.shape
+    if len(ranking_x) != len(ranking_y):
+        raise ValueError(ranking_x, ranking_y, "not the same shape")
 
-    global weight_vec
-    if weights is None:
-        weight_vec = gen_weights("uniform", rank_length)
+    rank_length = len(ranking_x)
+
+    if not np.all((1 <= ranking_x) & (ranking_x <= rank_length)):
+        raise ValueError("Elements of ranking_x must be within the range from 1 to the length of ranking_x")
+
+    if not np.all((1 <= ranking_y) & (ranking_y <= rank_length)):
+        raise ValueError("Elements of ranking_y must be within the range from 1 to the length of ranking_y")
+
     if isinstance(weights, str):
         weight_vec = gen_weights(weights, rank_length)
     elif isinstance(weights, np.ndarray):
@@ -46,105 +64,37 @@ def gamma_corr(ranking_a: Union[list, np.ndarray], ranking_b: Union[list, np.nda
     if not len(weight_vec) + 1 == rank_length:
         raise ValueError("Invalid ranking length")
 
-    # upper triangle matrix to calculate all pairwise comparisons
-    triu = np.triu_indices(rank_length, 1)
+    D_x = sequential_D_matrix_Calculation(ranking_x, weight_vec, distance_func)
+    D_y = sequential_D_matrix_Calculation(ranking_y, weight_vec, distance_func)
 
-    def D_matrix_Calcuration(ranking: np.array) -> np.array:
-        """
-        :param ranking: 1 × n array of an ordering
-        :return: n × n pairwise weight aggregations.
-        """
+    d_x, d_y = np.abs(D_x), np.abs(D_y)
+    R_x, R_y = np.maximum(D_x, 0), np.maximum(D_y, 0)
 
-        pair_indices = np.array(triu)
-        # calculate pairwise rank positions
-        rank_positions = ranking[pair_indices]
+    if tnorm_type == luka or distance_func == "max_based":  #What else could hold the fuzzy logic?
+        E_x, E_y = 1 - d_y, 1 - d_y
+    else:
+        raise ValueError("This condition does not satisfy the transitivity for fuzzy logic")
 
-        # reshape the pairs back into a matrix
-        matrix = np.zeros([rank_length, rank_length])
+    triu_indices = np.triu_indices(rank_length, 1)
+    C_matrix_vec = (np.vectorize(tnorm)(R_x[triu_indices], R_y[triu_indices], tnorm_type)
+                    + np.vectorize(tnorm)(R_x.T[triu_indices], R_y.T[triu_indices], tnorm_type))
+    D_matrix_vec = (np.vectorize(tnorm)(R_x[triu_indices], R_y.T[triu_indices], tnorm_type)
+                    + np.vectorize(tnorm)(R_x.T[triu_indices], R_y[triu_indices], tnorm_type))
+    T_matrix_vec = np.vectorize(conorm)(E_x[triu_indices], E_y[triu_indices], tnorm_type)
 
-        # first we fill lower triangle with the inverse rank positions
-        matrix[triu] = np.apply_along_axis(fuzzy_D, 0, np.flipud(rank_positions), weight=weight_vec)
-        matrix = matrix.T
+    con = np.sum(C_matrix_vec)
+    dis = np.sum(D_matrix_vec)
+    tie = np.sum(T_matrix_vec)
 
-        # after transposing we fill the top triangle
-        matrix[triu] = np.apply_along_axis(fuzzy_D, 0, rank_positions, weight=weight_vec)
+    if con + dis == 0:
+        gamma = 0
+    else:
+        gamma = (con - dis) / (con + dis)
 
-        return matrix  # n × n
-
-    # calculate all pairwise comparisons for all rankings. This considers the weights
-    D_a, D_b = np.apply_along_axis(D_matrix_Calcuration, 1, rankings)  # rank_length × rank_length
-    d_a, d_b = np.abs(D_a), np.abs(D_b)  # rank_length × rank_length
-    R_a, R_b = np.maximum(D_a, 0), np.maximum(D_b, 0)  # rank_length × rank_length
-    E_a, E_b = 1 - d_a, 1 - d_b  # rank_length × rank_length
-
-    rows, cols = R_a.shape
-    C_matrix = np.zeros([rows, cols])
-    D_matrix = np.zeros([rows, cols])
-    T_matrix = np.zeros([rows, cols])
-
-    for i in range(rows):
-        for j in range(cols):
-            C_matrix[i, j] = T(R_a[i, j], R_b[i, j], tnorm_type) + T(R_a[j, i], R_b[j, i], tnorm_type)
-            D_matrix[i, j] = T(R_a[i, j], R_b[j, i], tnorm_type) + T(R_a[j, i], R_b[i, j], tnorm_type)
-            T_matrix[i, j] = conorm(E_a[i, j], E_b[i, j], tnorm_type)
-
-    # print(C_matrix)
-    # print(D_matrix)
-    # print(T_matrix)
-
-    con = np.sum(C_matrix[triu])
-    dis = np.sum(D_matrix[triu])
-    tie = np.sum(T_matrix[triu])
-
-    # print("nC2: ", math.comb(rows, 2))
-    # print("condistie: ", (con + dis + tie))
-
-    try:
-        return (con - dis) / (con + dis)
-    except ZeroDivisionError:
-        return 0  # happens if and only if the sum is 0
-
-
-def graph_quad_plot(a, b):
-    weights = gen_quadratic_weights(a, b, 10)
-    print(weights)
-    plt.plot(np.linspace(0, 1, 9), weights)
-    plt.xlabel('Index')
-    plt.ylabel('Weight')
-    plt.title('Quadratic Weights')
-    plt.ylim(0, 1)
-    plt.show()
-
-
-def graph_beta_plot(flipped, a, b):
-    weights = gen_beta_weights(flipped, a, b, 1000)
-    plt.plot(np.linspace(0, 1, 999), weights)
-    plt.xlabel('Index')
-    plt.ylabel('Weight')
-    plt.title('Quadratic Weights')
-    plt.ylim(0, 1)
-    plt.show()
-
-
-# def graph_yoshi_plot(is_positive, point):
-#     weights = gen_quadratic_weights(is_positive, point, 1000)
-#     plt.plot(np.linspace(0.001, 0.999, 999), weights)
-#     plt.xlabel('Index')
-#     plt.ylabel('Weight')
-#     plt.title('Quadratic Weights')
-#     plt.ylim(0, 1)
-#     plt.show()
+    return gamma, con, dis, tie
 
 
 if __name__ == '__main__':
-    first = [1, 1, 1, 4, 5, 6]
-    second = [3, 4, 2, 1, 6, 8]
-
-    flipped = True
-    a = random.uniform(0, 20)
-    b = random.uniform(0, 20)
-    print("gamma: ", gamma_corr(first, second, weights=(flipped, a,b), tnorm_type=hamacher))
-    graph_beta_plot(flipped, a, b)
-
-    # graph_quad_plot(False, 0.9425678270600196)
-    # graph_beta_plot(3.94, 9.49)
+    first = [1, 1, 3, 4, 5]
+    second = [4, 5, 1, 2, 3]
+    print("gamma: ", gamma_corr(first, second, weights="top"))

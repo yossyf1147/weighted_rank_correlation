@@ -8,22 +8,18 @@ def cropped_linspace(start, end, len_):
 
 
 def gen_weights(mode, len_):
-
-    match mode:
-        case "uniform":
-            return np.ones(len_ - 1)
-        case "top":
-            return cropped_linspace(1, 0, len_)
-        case "bottom":
-            return cropped_linspace(0, 1, len_)
-        case "top bottom":
-            return np.abs(cropped_linspace(1, -1, len_))
-        case "middle":
-            return 1 - np.abs(cropped_linspace(1, -1, len_))
-        case 'top bottom exp':
-            return 4 * (cropped_linspace(0, 1, len_) - 0.5) ** 2
-        case _:
-            raise AttributeError(f'mode "{mode}" not defined')
+    weights_map = {
+        "uniform": np.ones(len_ - 1),
+        "top": cropped_linspace(1, 0, len_),
+        "bottom": cropped_linspace(0, 1, len_),
+        "top bottom": np.abs(cropped_linspace(1, -1, len_)),
+        "middle": 1 - np.abs(cropped_linspace(1, -1, len_)),
+        'top bottom exp': 4 * (cropped_linspace(0, 1, len_) - 0.5) ** 2
+    }
+    try:
+        return weights_map[mode]
+    except KeyError:
+        raise AttributeError(f'mode "{mode}" not defined')
 
 
 def gen_beta_weights(flipped: bool, alpha: float, beta_: float, length: int) -> np.ndarray:

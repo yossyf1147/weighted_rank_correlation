@@ -34,7 +34,7 @@ def hamacher(a: float, b: float):
         return a * b / (a + b - a * b)
 
 
-def T(a: float, b: float, tnorm_type: callable):
+def tnorm(a: float, b: float, tnorm_type: callable):
     if a == 1:
         return b
     if b == 1:
@@ -46,4 +46,4 @@ def T(a: float, b: float, tnorm_type: callable):
 
 
 def conorm(a: float, b: float, tnorm_type: callable):
-    return 1 - T(1 - a, 1 - b, tnorm_type)
+    return 1 - tnorm(1 - a, 1 - b, tnorm_type)
