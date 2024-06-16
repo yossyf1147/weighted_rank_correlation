@@ -2,6 +2,9 @@ from typing import Union, Optional
 from gamma_correlation.fuzzy import *
 from gamma_correlation.tnorms import *
 from gamma_correlation.weights import gen_weights, gen_beta_weights, gen_quadratic_weights
+from gamma_correlation.plot import *
+import pandas as pd
+import numpy as np
 
 
 # @jit(nopython=True)
@@ -17,7 +20,7 @@ def sequential_D_matrix_Calculation(ranking: np.array, weight_vec: np.ndarray, d
     return matrix
 
 
-def gamma_corr(ranking_x: Union[list, np.array], ranking_y: Union[list, np.array], *,
+def gamma_corr(ranking_x: Union[list, np.array, pd.DataFrame], ranking_y: Union[list, np.array, pd.DataFrame], *,
                weights: Optional[Union[str, np.array]] = "uniform", tnorm_type=luka, distance_func="max_based"):
     """
     :param distance_func:
@@ -30,8 +33,12 @@ def gamma_corr(ranking_x: Union[list, np.array], ranking_y: Union[list, np.array
     :param tnorm_type: T-Norm function to use
     :return:
     """
-    if not isinstance(ranking_x, (list, np.ndarray)) or not isinstance(ranking_y, (list, np.ndarray)):
-        raise ValueError("Input must be a list or a NumPy array")
+    if not isinstance(ranking_x, (list, np.ndarray, pd.DataFrame)) or not isinstance(ranking_y, (list, np.ndarray, pd.DataFrame)):
+        raise ValueError("Input must be a list, a NumPy array or DataFrame")
+
+    if isinstance(ranking_x, pd.DataFrame):
+        ranking_x = ranking_x.values.tolist()
+        ranking_y = ranking_y.values.tolist()
 
     if isinstance(ranking_x, list):
         ranking_x = np.array(ranking_x)
@@ -97,4 +104,6 @@ def gamma_corr(ranking_x: Union[list, np.array], ranking_y: Union[list, np.array
 if __name__ == '__main__':
     first = [1, 1, 3, 4, 5]
     second = [4, 5, 1, 2, 3]
-    print("gamma: ", gamma_corr(first, second, weights="top"))
+    print("gamma: ", gamma_corr(first, second, weights=(False, 0.5, 0.5)))
+    # a, b = 1.5, 0.5
+    # graph_beta_plot(False, a, b)
