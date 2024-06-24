@@ -67,6 +67,9 @@ def gamma_corr(ranking_x: Union[list, cp.array, pd.core.series.Series], ranking_
     if not len(weight_vec) + 1 == rank_length:
         raise ValueError("Invalid ranking length")
 
+    # Free GPU memory before allocating new arrays
+    cp.get_default_memory_pool().free_all_blocks()
+
     D_x = sequential_D_matrix_Calculation_gpu(ranking_x, weight_vec, distance_func)
     D_y = sequential_D_matrix_Calculation_gpu(ranking_y, weight_vec, distance_func)
 
