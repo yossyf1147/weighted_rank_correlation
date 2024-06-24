@@ -1,3 +1,4 @@
+import cupy as cp
 import numpy as np
 
 
@@ -13,7 +14,7 @@ def luka(a: float, b: float):
     :param b:
     :return:
     """
-    return np.maximum(a + b - 1, 0)
+    return cp.maximum(a + b - 1, 0)
 
 
 def drastic(a: float, b: float):
@@ -34,6 +35,7 @@ def hamacher(a: float, b: float):
         return a * b / (a + b - a * b)
 
 
+# Define t-norm functions directly without passing them as arguments
 def tnorm(a: float, b: float, tnorm_type: callable):
     if a == 1:
         return b
@@ -47,3 +49,6 @@ def tnorm(a: float, b: float, tnorm_type: callable):
 
 def conorm(a: float, b: float, tnorm_type: callable):
     return 1 - tnorm(1 - a, 1 - b, tnorm_type)
+
+
+

@@ -1,5 +1,6 @@
 from gamma_correlation.weights import gen_weights, gen_beta_weights, gen_quadratic_weights, gen_yoshi_weights
 from matplotlib import pyplot as plt
+import cupy as cp
 import numpy as np
 
 def graph_quad_plot(a, b):

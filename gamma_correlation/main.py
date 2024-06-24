@@ -3,14 +3,13 @@ from gamma_correlation.fuzzy import *
 from gamma_correlation.tnorms import *
 from gamma_correlation.plot import *
 import pandas as pd
-import numpy as np
+import cupy as cp
 
 
-# @jit(nopython=True)
-def sequential_D_matrix_Calculation(ranking: np.array, weight_vec: np.ndarray, distance_func) -> np.ndarray:
+def sequential_D_matrix_Calculation_gpu(ranking: cp.ndarray, weight_vec: cp.ndarray, distance_func) -> cp.ndarray:
     rank_length = len(ranking)
-    matrix = np.zeros((rank_length, rank_length))
-    triu_indices = np.triu_indices(rank_length, 1)
+    matrix = cp.zeros((rank_length, rank_length))
+    triu_indices = cp.triu_indices(rank_length, 1)
 
     for k in range(len(triu_indices[0])):
         i, j = triu_indices[0][k], triu_indices[1][k]
@@ -18,9 +17,8 @@ def sequential_D_matrix_Calculation(ranking: np.array, weight_vec: np.ndarray, d
         matrix[j, i] = -matrix[i, j]
     return matrix
 
-
-def gamma_corr(ranking_x: Union[list, np.array, pd.core.series.Series], ranking_y: Union[list, np.array, pd.core.series.Series], *,
-               weights: Optional[Union[str, np.array]] = "uniform", tnorm_type=luka, distance_func="max_based"):
+def gamma_corr(ranking_x: Union[list, cp.array, pd.core.series.Series], ranking_y: Union[list, cp.array, pd.core.series.Series], *,
+               weights: Optional[Union[str, cp.array]] = "uniform", tnorm_type=luka, distance_func="max_based"):
     """
     :param distance_func:
     :param ranking_x: First ranking
@@ -32,28 +30,28 @@ def gamma_corr(ranking_x: Union[list, np.array, pd.core.series.Series], ranking_
     :param tnorm_type: T-Norm function to use
     :return:
     """
-    if not isinstance(ranking_x, (list, np.ndarray, pd.core.series.Series)) or not isinstance(ranking_y, (list, np.ndarray, pd.core.series.Series)):
-        raise ValueError("Input must be a list, a NumPy array or pd.core.series.Series:", type(ranking_x))
+    # if not isinstance(ranking_x, (list, np.ndarray, pd.core.series.Series)) or not isinstance(ranking_y, (list, np.ndarray, pd.core.series.Series)):
+    #     raise ValueError("Input must be a list, a NumPy array or pd.core.series.Series:", type(ranking_x))
 
     if isinstance(ranking_x, list):
-        ranking_x = np.array(ranking_x)
-        ranking_y = np.array(ranking_y)
+        ranking_x = cp.array(ranking_x)
+        ranking_y = cp.array(ranking_y)
 
     if len(ranking_x) != len(ranking_y):
         raise ValueError(ranking_x, ranking_y, "not the same shape")
 
     rank_length = len(ranking_x)
 
-    if not np.all((1 <= ranking_x) & (ranking_x <= rank_length)):
+    if not cp.all((1 <= ranking_x) & (ranking_x <= rank_length)):
         raise ValueError("Elements of ranking_x must be within the range from 1 to the length of ranking_x")
 
-    if not np.all((1 <= ranking_y) & (ranking_y <= rank_length)):
+    if not cp.all((1 <= ranking_y) & (ranking_y <= rank_length)):
         raise ValueError("Elements of ranking_y must be within the range from 1 to the length of ranking_y")
 
     if isinstance(weights, str):
         weight_vec = gen_weights(weights, rank_length)
-    elif isinstance(weights, np.ndarray):
-        weight_vec = weights  # type:np.array
+    elif isinstance(weights, cp.ndarray):
+        weight_vec = weights  # type:cp.array
     elif isinstance(weights, tuple) and len(weights) == 2:
         alpha, beta_val = weights
         weight_vec = gen_quadratic_weights(alpha, beta_val, rank_length)
@@ -66,27 +64,34 @@ def gamma_corr(ranking_x: Union[list, np.array, pd.core.series.Series], ranking_
     if not len(weight_vec) + 1 == rank_length:
         raise ValueError("Invalid ranking length")
 
-    D_x = sequential_D_matrix_Calculation(ranking_x, weight_vec, distance_func)
-    D_y = sequential_D_matrix_Calculation(ranking_y, weight_vec, distance_func)
+    D_x = sequential_D_matrix_Calculation_gpu(ranking_x, weight_vec, distance_func)
+    D_y = sequential_D_matrix_Calculation_gpu(ranking_y, weight_vec, distance_func)
 
-    d_x, d_y = np.abs(D_x), np.abs(D_y)
-    R_x, R_y = np.maximum(D_x, 0), np.maximum(D_y, 0)
+    d_x, d_y = cp.abs(D_x), cp.abs(D_y)
+    R_x, R_y = cp.maximum(D_x, 0), cp.maximum(D_y, 0)
 
     if tnorm_type == luka or distance_func == "max_based":  #What else could hold the fuzzy logic?
         E_x, E_y = 1 - d_y, 1 - d_y
     else:
         raise ValueError("This condition does not satisfy the transitivity for fuzzy logic")
 
-    triu_indices = np.triu_indices(rank_length, 1)
-    C_matrix_vec = (np.vectorize(tnorm)(R_x[triu_indices], R_y[triu_indices], tnorm_type)
-                    + np.vectorize(tnorm)(R_x.T[triu_indices], R_y.T[triu_indices], tnorm_type))
-    D_matrix_vec = (np.vectorize(tnorm)(R_x[triu_indices], R_y.T[triu_indices], tnorm_type)
-                    + np.vectorize(tnorm)(R_x.T[triu_indices], R_y[triu_indices], tnorm_type))
-    T_matrix_vec = np.vectorize(conorm)(E_x[triu_indices], E_y[triu_indices], tnorm_type)
 
-    con = np.sum(C_matrix_vec)
-    dis = np.sum(D_matrix_vec)
-    tie = np.sum(T_matrix_vec)
+    triu_indices = cp.triu_indices(rank_length, 1)
+
+    def elementwise_tnorm(a, b, tnorm_type):
+        return cp.array([tnorm(ai, bi, tnorm_type) for ai, bi in zip(a, b)])
+
+    def elementwise_conorm(a, b, tnorm_type):
+        return cp.array([conorm(ai, bi, tnorm_type) for ai, bi in zip(a, b)])
+
+    C_matrix_vec = elementwise_tnorm(R_x[triu_indices], R_y[triu_indices], tnorm_type) + elementwise_tnorm(R_x.T[triu_indices], R_y.T[triu_indices], tnorm_type)
+    D_matrix_vec = elementwise_tnorm(R_x[triu_indices], R_y.T[triu_indices], tnorm_type) + elementwise_tnorm(R_x.T[triu_indices], R_y[triu_indices], tnorm_type)
+    T_matrix_vec = elementwise_conorm(E_x[triu_indices], E_y[triu_indices], tnorm_type)
+
+
+    con = cp.sum(C_matrix_vec)
+    dis = cp.sum(D_matrix_vec)
+    tie = cp.sum(T_matrix_vec)
 
     if con + dis == 0:
         gamma = 0
@@ -99,6 +104,6 @@ def gamma_corr(ranking_x: Union[list, np.array, pd.core.series.Series], ranking_
 if __name__ == '__main__':
     first = [1, 1, 3, 4, 5]
     second = [4, 5, 1, 2, 3]
-    print("gamma: ", gamma_corr(first, second, weights=(False, 0.5, 0.5)))
-    # a, b = 1.5, 0.5
-    # graph_beta_plot(False, a, b)
+    print("gamma: ", gamma_corr(first, second))
+
+

@@ -1,19 +1,20 @@
+import cupy as cp
 import numpy as np
-import scipy.special as sc
+import numpy
 from scipy.stats import beta
 
 
 def cropped_linspace(start, end, len_):
-    return np.linspace(start, end, len_ + 1)[1:-1]
+    return cp.linspace(start, end, len_ + 1)[1:-1]
 
 
 def gen_weights(mode, len_):
     weights_map = {
-        "uniform": np.ones(len_ - 1),
+        "uniform": cp.ones(len_ - 1),
         "top": cropped_linspace(1, 0, len_),
         "bottom": cropped_linspace(0, 1, len_),
-        "top bottom": np.abs(cropped_linspace(1, -1, len_)),
-        "middle": 1 - np.abs(cropped_linspace(1, -1, len_)),
+        "top bottom": cp.abs(cropped_linspace(1, -1, len_)),
+        "middle": 1 - cp.abs(cropped_linspace(1, -1, len_)),
         'top bottom exp': 4 * (cropped_linspace(0, 1, len_) - 0.5) ** 2
     }
     try:
@@ -22,7 +23,7 @@ def gen_weights(mode, len_):
         raise AttributeError(f'mode "{mode}" not defined')
 
 
-def gen_beta_weights(flipped: bool, alpha: float, beta_: float, length: int) -> np.ndarray:
+def gen_beta_weights(flipped: bool, alpha: float, beta_: float, length: int) -> cp.ndarray:
     """
     Generate weights from Beta distribution.
 
@@ -34,14 +35,14 @@ def gen_beta_weights(flipped: bool, alpha: float, beta_: float, length: int) -> 
     """
     x = cropped_linspace(0, 1, length)
     y = beta.pdf(x, alpha, beta_)
-    y /= np.max(y)
+    y /= cp.max(y)
     if flipped:
         return 1 - y
     else:
         return y
 
 
-def gen_quadratic_weights(intercept: bool, x_intercept: float, length: int) -> np.ndarray:
+def gen_quadratic_weights(intercept: bool, x_intercept: float, length: int) -> cp.ndarray:
     """
     Generate weights from a quadratic function.
 
@@ -50,8 +51,8 @@ def gen_quadratic_weights(intercept: bool, x_intercept: float, length: int) -> n
     :param length: Length of the weight vector
     :return: Array of weights generated from the quadratic function
     """
-    x = np.linspace(0.001, 0.999, length - 1)
-    x_intercept = np.clip(x_intercept, 0, 1)
+    x = cp.linspace(0.001, 0.999, length - 1)
+    x_intercept = cp.clip(x_intercept, 0, 1)
     gradient_a = 1 / (x_intercept * x_intercept)
     gradient_b = 1 / ((1 - x_intercept) * (1 - x_intercept))
     x_square = (x - x_intercept) * (x - x_intercept)
@@ -68,14 +69,14 @@ def gen_quadratic_weights(intercept: bool, x_intercept: float, length: int) -> n
     return weights
 
 
-def gen_yoshi_weights(is_positive: bool, point: float, length: int) -> np.ndarray:
-    point = np.clip(point, 0.0001, 0.9999)
+def gen_yoshi_weights(is_positive: bool, point: float, length: int) -> cp.ndarray:
+    point = cp.clip(point, 0.0001, 0.9999)
 
-    x = np.linspace(0, 1, length - 1)
+    x = cp.linspace(0, 1, length - 1)
 
     if is_positive:
-        weights = np.where(x <= point, -x / point + 1, (x - 1) / (1 - point) + 1)
+        weights = cp.where(x <= point, -x / point + 1, (x - 1) / (1 - point) + 1)
     else:
-        weights = np.where(x <= point, x / point, - (x - 1) / (1 - point))
+        weights = cp.where(x <= point, x / point, - (x - 1) / (1 - point))
 
     return weights
