@@ -1,4 +1,4 @@
-import numpy as np
+import numba as np
 from numba import jit
 
 # def fuzzy_E(a, b) -> float:
