@@ -34,7 +34,7 @@ def gamma_corr(ranking_x: Union[list, np.array, pd.DataFrame], ranking_y: Union[
     :return:
     """
     if not isinstance(ranking_x, (list, np.ndarray, pd.DataFrame)) or not isinstance(ranking_y, (list, np.ndarray, pd.DataFrame)):
-        raise ValueError("Input must be a list, a NumPy array or DataFrame")
+        raise ValueError("Input must be a list, a NumPy array or DataFrame:", type(ranking_x))
 
     if isinstance(ranking_x, pd.DataFrame):
         ranking_x = ranking_x.values.tolist()
