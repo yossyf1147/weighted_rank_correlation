@@ -1,4 +1,4 @@
-import numba as np
+import numpy as np
 
 
 def to_ranking(ordering: np.array) -> np.array:

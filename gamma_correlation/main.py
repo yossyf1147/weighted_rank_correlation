@@ -3,7 +3,7 @@ from gamma_correlation.fuzzy import *
 from gamma_correlation.tnorms import *
 from gamma_correlation.plot import *
 import pandas as pd
-import numba as np
+import numpy as np
 
 
 # @jit(nopython=True)
@@ -34,10 +34,6 @@ def gamma_corr(ranking_x: Union[list, np.array, pd.core.series.Series], ranking_
     """
     if not isinstance(ranking_x, (list, np.ndarray, pd.core.series.Series)) or not isinstance(ranking_y, (list, np.ndarray, pd.core.series.Series)):
         raise ValueError("Input must be a list, a NumPy array or pd.core.series.Series:", type(ranking_x))
-
-    if isinstance(ranking_x, pd.DataFrame):
-        ranking_x = ranking_x.values.tolist()
-        ranking_y = ranking_y.values.tolist()
 
     if isinstance(ranking_x, list):
         ranking_x = np.array(ranking_x)

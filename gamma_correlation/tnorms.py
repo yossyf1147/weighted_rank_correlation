@@ -1,4 +1,4 @@
-import numba as np
+import numpy as np
 
 
 def prod(a: float, b: float):

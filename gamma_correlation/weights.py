@@ -1,4 +1,4 @@
-import numba as np
+import numpy as np
 import scipy.special as sc
 from scipy.stats import beta
 
