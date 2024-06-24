@@ -20,7 +20,7 @@ def sequential_D_matrix_Calculation(ranking: np.array, weight_vec: np.ndarray, d
     return matrix
 
 
-def gamma_corr(ranking_x: Union[list, np.array, pd.DataFrame], ranking_y: Union[list, np.array, pd.DataFrame], *,
+def gamma_corr(ranking_x: Union[list, np.array, pd.core.series.Series], ranking_y: Union[list, np.array, pd.core.series.Series], *,
                weights: Optional[Union[str, np.array]] = "uniform", tnorm_type=luka, distance_func="max_based"):
     """
     :param distance_func:
@@ -33,8 +33,8 @@ def gamma_corr(ranking_x: Union[list, np.array, pd.DataFrame], ranking_y: Union[
     :param tnorm_type: T-Norm function to use
     :return:
     """
-    if not isinstance(ranking_x, (list, np.ndarray, pd.DataFrame)) or not isinstance(ranking_y, (list, np.ndarray, pd.DataFrame)):
-        raise ValueError("Input must be a list, a NumPy array or DataFrame:", type(ranking_x))
+    if not isinstance(ranking_x, (list, np.ndarray, pd.core.series.Series)) or not isinstance(ranking_y, (list, np.ndarray, pd.core.series.Series)):
+        raise ValueError("Input must be a list, a NumPy array or pd.core.series.Series:", type(ranking_x))
 
     if isinstance(ranking_x, pd.DataFrame):
         ranking_x = ranking_x.values.tolist()
